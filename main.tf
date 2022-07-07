@@ -16,23 +16,24 @@ provider "aws" {
 resource "aws_instance" "web" {
   ami           = var.instance_ami
   instance_type = var.instance_type
+  
+  vpc_security_group_ids = [
+    aws_security_group.vpc.id
+  ]
+}
 
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo apt update -y 
-    sudo apt install curl -y
-    sudo apt install git -y
-    sudo apt-get install \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
-    sudo mkdir -p /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
-  EOF
+resource "aws_security_group" "vpc" {
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
