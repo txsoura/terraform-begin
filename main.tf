@@ -13,27 +13,12 @@ provider "aws" {
   region = var.aws_region
 }
 
-resource "aws_instance" "instance" {
-  ami           = var.instance_ami
-  instance_type = var.instance_type
-  
-  vpc_security_group_ids = [
-    aws_security_group.default.id
-  ]
-}
-
-resource "aws_vpc" "mainvpc" {
-  cidr_block = "10.1.0.0/16"
-}
-
-resource "aws_security_group" "default" {
-  vpc_id = aws_vpc.mainvpc.id
-
-  ingress {
-    protocol  = -1
-    self      = true
-    from_port = 0
-    to_port   = 0
+resource "aws_security_group" "asg" {
+ ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -42,4 +27,14 @@ resource "aws_security_group" "default" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+
+resource "aws_instance" "web" {
+  ami           = var.instance_ami
+  instance_type = var.instance_type
+
+  vpc_security_group_ids = [
+    aws_security_group.asg.id
+  ]
 }
