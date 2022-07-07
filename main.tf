@@ -35,6 +35,4 @@ resource "aws_instance" "web" {
     sudo apt-get update
     sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin -y
   EOF
-
-  vpc_security_group_ids = []
 }
